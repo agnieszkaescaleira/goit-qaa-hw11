@@ -1,0 +1,42 @@
+config:
+  target: 'https://jsonplaceholder.typicode.com'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+  payload:
+    path: './payload.json'
+    fields:
+      - "title"
+      - "body"
+      - "userId"
+  defaults:
+    headers:
+      content-type: 'application/json'
+scenarios:
+  - flow:
+    - get:
+        url: '/posts/1'
+    - post:
+        url: '/posts'
+        json:
+          title: "{{ title }}"
+          body: "{{ body }}"
+          userId: "{{ userId }}"
+        capture:
+          - json: '$.id'
+            as: 'postId'
+    - get:
+        url: '/posts/{{ postId }}'
+        validate:
+          - statusCode: 200
+          - contentLength: 5000
+        expect:
+          json:
+            userId: "{{ userId }}"
+  ensure:
+    - condition: "p95(response_time) < 2000"
+      message: "95th percentile response time should be less than 2000ms"
+    - condition: "max(response_time) < 3000"
+      message: "Max response time should be less than 3000ms"
+    - condition: "median(response_time) < 1500"
+      message: "Median response time should be less than 1500ms"

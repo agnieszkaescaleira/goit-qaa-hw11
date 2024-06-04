@@ -1,0 +1,4 @@
+[
+    { "title": "foo", "body": "bar", "userId": 1 },
+    { "title": "baz", "body": "qux", "userId": 2 }
+  ]
